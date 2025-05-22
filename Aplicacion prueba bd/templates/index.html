@@ -1,0 +1,1054 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clínica Veterinaria Altavida - Sistema de Gestión</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <!-- DataTables CSS -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/css/dataTables.bootstrap5.min.css" rel="stylesheet">
+
+    <style>
+        :root {
+            --primary-color: #2c5aa0;
+            --secondary-color: #28a745;
+            --accent-color: #ffc107;
+            --danger-color: #dc3545;
+            --dark-color: #343a40;
+            --light-bg: #f8f9fa;
+        }
+
+        body {
+            background-color: var(--light-bg);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .navbar {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color)) !important;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+        }
+
+        .stats-card.success {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stats-card.warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+        }
+
+        .stats-card.danger {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        }
+
+        .stats-card.info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .btn-custom {
+            border-radius: 25px;
+            padding: 10px 25px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-custom:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .section-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 15px 25px;
+            border-radius: 15px 15px 0 0;
+            margin: 0;
+        }
+
+        .nav-pills .nav-link {
+            border-radius: 25px;
+            margin: 0 5px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .nav-pills .nav-link.active {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        .table-responsive {
+            border-radius: 15px;
+            overflow: hidden;
+        }
+
+        .alert {
+            border-radius: 15px;
+            border: none;
+        }
+
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus, .form-select:focus {
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 0.2rem rgba(44, 90, 160, 0.25);
+        }
+
+        .modal-content {
+            border-radius: 20px;
+            border: none;
+        }
+
+        .modal-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner-border {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        .status-badge {
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-normal { background-color: #d4edda; color: #155724; }
+        .status-bajo { background-color: #fff3cd; color: #856404; }
+        .status-critico { background-color: #f8d7da; color: #721c24; }
+
+        @media (max-width: 768px) {
+            .stats-card {
+                margin-bottom: 15px;
+                padding: 20px;
+            }
+
+            .nav-pills {
+                flex-direction: column;
+            }
+
+            .nav-pills .nav-link {
+                margin: 5px 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="fas fa-hospital"></i> Clínica Veterinaria Altavida
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <span class="navbar-text">
+                            <i class="fas fa-user-md"></i> Sistema de Gestión Médica
+                        </span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid py-4">
+        <!-- Dashboard Stats -->
+        <div class="row mb-4">
+            <div class="col-md-2 col-sm-6">
+                <div class="stats-card info">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h3 class="mb-0">{{ stats.total_mascotas or 0 }}</h3>
+                            <p class="mb-0">Mascotas</p>
+                        </div>
+                        <i class="fas fa-paw fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-6">
+                <div class="stats-card success">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h3 class="mb-0">{{ stats.total_veterinarios or 0 }}</h3>
+                            <p class="mb-0">Veterinarios</p>
+                        </div>
+                        <i class="fas fa-user-md fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-2 col-sm-6">
+                <div class="stats-card warning">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h3 class="mb-0">{{ stats.citas_hoy or 0 }}</h3>
+                            <p class="mb-0">Citas Hoy</p>
+                        </div>
+                        <i class="fas fa-calendar fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card danger">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h3 class="mb-0">{{ stats.medicamentos_criticos or 0 }}</h3>
+                            <p class="mb-0">Medicamentos Críticos</p>
+                        </div>
+                        <i class="fas fa-pills fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3 col-sm-6">
+                <div class="stats-card info">
+                    <div class="d-flex align-items-center">
+                        <div class="flex-grow-1">
+                            <h3 class="mb-0">{{ stats.notificaciones_pendientes or 0 }}</h3>
+                            <p class="mb-0">Notificaciones</p>
+                        </div>
+                        <i class="fas fa-bell fa-2x opacity-75"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <ul class="nav nav-pills justify-content-center mb-4" id="mainTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="tratamientos-tab" data-bs-toggle="pill" data-bs-target="#tratamientos" type="button">
+                    <i class="fas fa-syringe"></i> Tratamientos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="inventario-tab" data-bs-toggle="pill" data-bs-target="#inventario" type="button">
+                    <i class="fas fa-pills"></i> Inventario
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="facturacion-tab" data-bs-toggle="pill" data-bs-target="#facturacion" type="button">
+                    <i class="fas fa-file-invoice-dollar"></i> Facturación
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="diagnosticos-tab" data-bs-toggle="pill" data-bs-target="#diagnosticos" type="button">
+                    <i class="fas fa-stethoscope"></i> Diagnósticos
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="reportes-tab" data-bs-toggle="pill" data-bs-target="#reportes" type="button">
+                    <i class="fas fa-chart-bar"></i> Reportes
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="notificaciones-tab" data-bs-toggle="pill" data-bs-target="#notificaciones" type="button">
+                    <i class="fas fa-bell"></i> Notificaciones
+                </button>
+            </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content" id="mainTabContent">
+            <!-- Tratamientos Tab -->
+            <div class="tab-pane fade show active" id="tratamientos" role="tabpanel">
+                <div class="card">
+                    <h5 class="section-header">
+                        <i class="fas fa-syringe"></i> Registro de Tratamientos
+                    </h5>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Historia Clínica</label>
+                                    <select class="form-select" id="selectHistoria">
+                                        <option value="">Seleccione una historia clínica...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Tratamiento</label>
+                                    <select class="form-select" id="selectTratamiento">
+                                        <option value="">Seleccione un tratamiento...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Veterinario</label>
+                                    <select class="form-select" id="selectVeterinario">
+                                        <option value="">Seleccione un veterinario...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Observaciones</label>
+                                    <textarea class="form-control" id="observacionesTratamiento" rows="3" placeholder="Observaciones del tratamiento..."></textarea>
+                                </div>
+                                <button type="button" class="btn btn-primary btn-custom" onclick="registrarTratamiento()">
+                                    <i class="fas fa-save"></i> Registrar Tratamiento
+                                </button>
+                            </div>
+                            <div class="col-md-6">
+                                <h6><i class="fas fa-list"></i> Historias Clínicas Recientes</h6>
+                                <div class="table-responsive">
+                                    <table class="table table-sm" id="tablaHistorias">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Mascota</th>
+                                                <th>Especie</th>
+                                                <th>Raza</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Inventario Tab -->
+            <div class="tab-pane fade" id="inventario" role="tabpanel">
+                <div class="card">
+                    <h5 class="section-header">
+                        <i class="fas fa-pills"></i> Gestión de Inventario
+                    </h5>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Medicamento</label>
+                                    <select class="form-select" id="selectMedicamento">
+                                        <option value="">Seleccione un medicamento...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Nueva Cantidad</label>
+                                    <input type="number" class="form-control" id="nuevaCantidad" min="0" placeholder="Cantidad...">
+                                </div>
+                                <button type="button" class="btn btn-success btn-custom" onclick="actualizarInventario()">
+                                    <i class="fas fa-sync"></i> Actualizar Inventario
+                                </button>
+                            </div>
+                            <div class="col-md-8">
+                                <h6><i class="fas fa-warehouse"></i> Estado del Inventario</h6>
+                                <div class="table-responsive">
+                                    <table class="table" id="tablaInventario">
+                                        <thead>
+                                            <tr>
+                                                <th>Medicamento</th>
+                                                <th>Cantidad</th>
+                                                <th>Mínimo</th>
+                                                <th>Óptimo</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Facturación Tab -->
+            <div class="tab-pane fade" id="facturacion" role="tabpanel">
+                <div class="card">
+                    <h5 class="section-header">
+                        <i class="fas fa-file-invoice-dollar"></i> Facturación de Citas
+                    </h5>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Cita a Facturar</label>
+                                    <select class="form-select" id="selectCita">
+                                        <option value="">Seleccione una cita...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Total a Facturar</label>
+                                    <input type="number" class="form-control" id="totalFactura" min="0" step="0.01" placeholder="0.00">
+                                </div>
+                                <button type="button" class="btn btn-warning btn-custom" onclick="facturarCita()">
+                                    <i class="fas fa-file-invoice"></i> Generar Factura
+                                </button>
+                            </div>
+                            <div class="col-md-8">
+                                <h6><i class="fas fa-list-alt"></i> Citas Disponibles para Facturar</h6>
+                                <div class="table-responsive">
+                                    <table class="table" id="tablaCitas">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Mascota</th>
+                                                <th>Veterinario</th>
+                                                <th>Fecha</th>
+                                                <th>Propietario</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Diagnósticos Tab -->
+            <div class="tab-pane fade" id="diagnosticos" role="tabpanel">
+                <div class="card">
+                    <h5 class="section-header">
+                        <i class="fas fa-stethoscope"></i> Diagnósticos Críticos
+                    </h5>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="mb-3">
+                                    <label class="form-label">Historia Clínica</label>
+                                    <select class="form-select" id="selectHistoriaDiag">
+                                        <option value="">Seleccione una historia clínica...</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Diagnóstico</label>
+                                    <select class="form-select" id="selectDiagnostico">
+                                        <option value="">Seleccione un diagnóstico...</option>
+                                    </select>
+                                </div>
+                                <button type="button" class="btn btn-danger btn-custom" onclick="registrarDiagnosticoCritico()">
+                                    <i class="fas fa-exclamation-triangle"></i> Registrar Diagnóstico Crítico
+                                </button>
+                            </div>
+                            <div class="col-md-8">
+                                <h6><i class="fas fa-heart-broken"></i> Diagnósticos de Riesgo Vital</h6>
+                                <div class="table-responsive">
+                                    <table class="table" id="tablaDiagnosticos">
+                                        <thead>
+                                            <tr>
+                                                <th>ID</th>
+                                                <th>Nombre</th>
+                                                <th>Categoría</th>
+                                                <th>Riesgo Vital</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody></tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reportes Tab -->
+            <div class="tab-pane fade" id="reportes" role="tabpanel">
+                <div class="card">
+                    <h5 class="section-header">
+                        <i class="fas fa-chart-bar"></i> Reportes y Análisis
+                    </h5>
+                    <div class="card-body">
+                        <div class="row mb-3">
+                            <div class="col-md-4">
+                                <label class="form-label">Fecha del Reporte</label>
+                                <input type="date" class="form-control" id="fechaReporte">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">&nbsp;</label>
+                                <div>
+                                    <button type="button" class="btn btn-info btn-custom" onclick="generarReporteDiario()">
+                                        <i class="fas fa-file-alt"></i> Generar Reporte Diario
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">&nbsp;</label>
+                                <div>
+                                    <button type="button" class="btn btn-secondary btn-custom" onclick="cargarErrores()">
+                                        <i class="fas fa-bug"></i> Ver Errores
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="reporteContainer">
+                            <div class="text-center py-5">
+                                <i class="fas fa-chart-line fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Seleccione una fecha y genere el reporte</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notificaciones Tab -->
+            <div class="tab-pane fade" id="notificaciones" role="tabpanel">
+                <div class="card">
+                    <h5 class="section-header">
+                        <i class="fas fa-bell"></i> Centro de Notificaciones
+                        <button type="button" class="btn btn-light btn-sm float-end" onclick="marcarNotificacionesLeidas()">
+                            <i class="fas fa-check-double"></i> Marcar todas como leídas
+                        </button>
+                    </h5>
+                    <div class="card-body">
+                        <div id="notificacionesContainer">
+                            <div class="text-center py-5">
+                                <i class="fas fa-bell fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">Cargando notificaciones...</h5>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Modal -->
+    <div class="modal fade" id="loadingModal" tabindex="-1" data-bs-backdrop="static">
+        <div class="modal-dialog modal-sm modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-body text-center">
+                    <div class="spinner-border text-primary" role="status">
+                        <span class="visually-hidden">Procesando...</span>
+                    </div>
+                    <p class="mt-3 mb-0">Procesando...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datatables/1.10.21/js/dataTables.bootstrap5.min.js"></script>
+
+    <script>
+        // Variables globales
+        let historiasData = [];
+        let tratamientosData = [];
+        let veterinariosData = [];
+        let medicamentosData = [];
+        let citasData = [];
+        let diagnosticosData = [];
+        let loadingModal;
+
+        // Inicialización
+        $(document).ready(function() {
+            loadingModal = new bootstrap.Modal(document.getElementById('loadingModal'));
+            cargarDatosIniciales();
+
+            // Event listeners para tabs
+            $('#mainTabs button').on('shown.bs.tab', function (e) {
+                const target = $(e.target).attr('data-bs-target');
+                if (target === '#notificaciones') {
+                    cargarNotificaciones();
+                }
+            });
+        });
+
+        // Funciones de carga de datos
+        async function cargarDatosIniciales() {
+            showLoading();
+            try {
+                await Promise.all([
+                    cargarHistoriasClinicas(),
+                    cargarTratamientos(),
+                    cargarVeterinarios(),
+                    cargarMedicamentos(),
+                    cargarCitasFacturar(),
+                    cargarDiagnosticos()
+                ]);
+            } catch (error) {
+                showAlert('Error al cargar datos iniciales: ' + error.message, 'danger');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function cargarHistoriasClinicas() {
+            const response = await fetch('/api/historias-clinicas');
+            historiasData = await response.json();
+
+            const selects = ['#selectHistoria', '#selectHistoriaDiag'];
+            selects.forEach(selector => {
+                const select = $(selector);
+                select.html('<option value="">Seleccione una historia clínica...</option>');
+                historiasData.forEach(historia => {
+                    select.append(`<option value="${historia.id_historia_clinica}">
+                        ${historia.mascota} - ${historia.especie} (${historia.raza})
+                    </option>`);
+                });
+            });
+
+            // Actualizar tabla
+            $('#tablaHistorias tbody').empty();
+            historiasData.forEach(historia => {
+                $('#tablaHistorias tbody').append(`
+                    <tr>
+                        <td>${historia.id_historia_clinica}</td>
+                        <td>${historia.mascota}</td>
+                        <td>${historia.especie}</td>
+                        <td>${historia.raza}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        async function cargarTratamientos() {
+            const response = await fetch('/api/tratamientos');
+            tratamientosData = await response.json();
+
+            const select = $('#selectTratamiento');
+            select.html('<option value="">Seleccione un tratamiento...</option>');
+            tratamientosData.forEach(tratamiento => {
+                select.append(`<option value="${tratamiento.id_tratamiento}">
+                    ${tratamiento.nombre} - ${tratamiento.tipo} (${tratamiento.precio.toLocaleString()})
+                </option>`);
+            });
+        }
+
+        async function cargarVeterinarios() {
+            const response = await fetch('/api/veterinarios');
+            veterinariosData = await response.json();
+
+            const select = $('#selectVeterinario');
+            select.html('<option value="">Seleccione un veterinario...</option>');
+            veterinariosData.forEach(vet => {
+                select.append(`<option value="${vet.id_veterinario}">
+                    ${vet.nombre} ${vet.apellido} - ${vet.especialidad}
+                </option>`);
+            });
+        }
+
+        async function cargarMedicamentos() {
+            const response = await fetch('/api/medicamentos');
+            medicamentosData = await response.json();
+
+            const select = $('#selectMedicamento');
+            select.html('<option value="">Seleccione un medicamento...</option>');
+            medicamentosData.forEach(med => {
+                select.append(`<option value="${med.id_medicamento}">
+                    ${med.nombre} (Actual: ${med.cantidad})
+                </option>`);
+            });
+
+            // Actualizar tabla de inventario
+            $('#tablaInventario tbody').empty();
+            medicamentosData.forEach(med => {
+                const estadoClass = med.estado === 'crítico' ? 'status-critico' :
+                                   med.estado === 'bajo' ? 'status-bajo' : 'status-normal';
+                $('#tablaInventario tbody').append(`
+                    <tr>
+                        <td>${med.nombre}</td>
+                        <td>${med.cantidad}</td>
+                        <td>${med.nivel_minimo}</td>
+                        <td>${med.nivel_optimo}</td>
+                        <td><span class="status-badge ${estadoClass}">${med.estado}</span></td>
+                    </tr>
+                `);
+            });
+        }
+
+        async function cargarCitasFacturar() {
+            const response = await fetch('/api/citas-facturar');
+            citasData = await response.json();
+
+            const select = $('#selectCita');
+            select.html('<option value="">Seleccione una cita...</option>');
+            citasData.forEach(cita => {
+                select.append(`<option value="${cita.id_cita}" data-propietario="${cita.id_propietario}">
+                    ${cita.mascota} - ${cita.veterinario} (${new Date(cita.fecha_hora).toLocaleDateString()})
+                </option>`);
+            });
+
+            // Actualizar tabla
+            $('#tablaCitas tbody').empty();
+            citasData.forEach(cita => {
+                $('#tablaCitas tbody').append(`
+                    <tr>
+                        <td>${cita.id_cita}</td>
+                        <td>${cita.mascota}</td>
+                        <td>${cita.veterinario}</td>
+                        <td>${new Date(cita.fecha_hora).toLocaleDateString()}</td>
+                        <td>${cita.propietario}</td>
+                    </tr>
+                `);
+            });
+        }
+
+        async function cargarDiagnosticos() {
+            const response = await fetch('/api/diagnosticos');
+            diagnosticosData = await response.json();
+
+            const select = $('#selectDiagnostico');
+            select.html('<option value="">Seleccione un diagnóstico...</option>');
+            diagnosticosData.forEach(diag => {
+                select.append(`<option value="${diag.id_diagnostico}">
+                    ${diag.nombre} - ${diag.categoria} ${diag.riesgo_vital ? '⚠️' : ''}
+                </option>`);
+            });
+
+            // Actualizar tabla
+            $('#tablaDiagnosticos tbody').empty();
+            diagnosticosData.filter(d => d.riesgo_vital).forEach(diag => {
+                $('#tablaDiagnosticos tbody').append(`
+                    <tr>
+                        <td>${diag.id_diagnostico}</td>
+                        <td>${diag.nombre}</td>
+                        <td>${diag.categoria}</td>
+                        <td><span class="status-badge status-critico">SÍ</span></td>
+                    </tr>
+                `);
+            });
+        }
+
+        // Funciones de operaciones
+        async function registrarTratamiento() {
+            const idHistoria = $('#selectHistoria').val();
+            const idTratamiento = $('#selectTratamiento').val();
+            const idVeterinario = $('#selectVeterinario').val();
+            const observaciones = $('#observacionesTratamiento').val();
+
+            if (!idHistoria || !idTratamiento || !idVeterinario) {
+                showAlert('Por favor complete todos los campos obligatorios', 'warning');
+                return;
+            }
+
+            showLoading();
+            try {
+                const response = await fetch('/api/registrar-tratamiento', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        id_historia: idHistoria,
+                        id_tratamiento: idTratamiento,
+                        id_veterinario: idVeterinario,
+                        observaciones: observaciones
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    $('#selectHistoria, #selectTratamiento, #selectVeterinario').val('');
+                    $('#observacionesTratamiento').val('');
+                } else {
+                    showAlert(result.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'danger');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function actualizarInventario() {
+            const idMedicamento = $('#selectMedicamento').val();
+            const cantidad = $('#nuevaCantidad').val();
+
+            if (!idMedicamento || !cantidad) {
+                showAlert('Por favor complete todos los campos', 'warning');
+                return;
+            }
+
+            showLoading();
+            try {
+                const response = await fetch('/api/actualizar-inventario', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        id_medicamento: idMedicamento,
+                        cantidad: parseInt(cantidad)
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    $('#selectMedicamento').val('');
+                    $('#nuevaCantidad').val('');
+                    await cargarMedicamentos();
+                } else {
+                    showAlert(result.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'danger');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function facturarCita() {
+            const idCita = $('#selectCita').val();
+            const total = $('#totalFactura').val();
+            const idPropietario = $('#selectCita option:selected').data('propietario');
+
+            if (!idCita || !total) {
+                showAlert('Por favor complete todos los campos', 'warning');
+                return;
+            }
+
+            showLoading();
+            try {
+                const response = await fetch('/api/facturar-cita', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        id_cita: idCita,
+                        id_propietario: idPropietario,
+                        total: parseFloat(total)
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showAlert(result.message + ` (Factura #${result.id_factura})`, 'success');
+                    $('#selectCita').val('');
+                    $('#totalFactura').val('');
+                    await cargarCitasFacturar();
+                } else {
+                    showAlert(result.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'danger');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function registrarDiagnosticoCritico() {
+            const idHistoria = $('#selectHistoriaDiag').val();
+            const idDiagnostico = $('#selectDiagnostico').val();
+
+            if (!idHistoria || !idDiagnostico) {
+                showAlert('Por favor complete todos los campos', 'warning');
+                return;
+            }
+
+            showLoading();
+            try {
+                const response = await fetch('/api/registrar-diagnostico-critico', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        id_historia: idHistoria,
+                        id_diagnostico: idDiagnostico
+                    })
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    $('#selectHistoriaDiag, #selectDiagnostico').val('');
+                } else {
+                    showAlert(result.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'danger');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function generarReporteDiario() {
+            const fecha = $('#fechaReporte').val();
+
+            showLoading();
+            try {
+                const url = fecha ? `/api/reporte-diario?fecha=${fecha}` : '/api/reporte-diario';
+                const response = await fetch(url);
+                const reporte = await response.json();
+
+                if (reporte.error) {
+                    showAlert('Error al generar reporte: ' + reporte.error, 'danger');
+                    return;
+                }
+
+                let html = '<div class="row">';
+                let currentSection = '';
+
+                reporte.forEach(item => {
+                    if (item.seccion !== currentSection) {
+                        if (currentSection !== '') html += '</div></div>';
+                        html += `<div class="col-12 mb-4"><h5 class="text-primary"><i class="fas fa-chart-bar"></i> ${item.seccion}</h5><div class="table-responsive"><table class="table table-striped"><tbody>`;
+                        currentSection = item.seccion;
+                    }
+                    html += `<tr><td><strong>${item.categoria}</strong></td><td>${item.detalle}</td><td class="text-end">${item.valor}</td></tr>`;
+                });
+
+                if (currentSection !== '') html += '</tbody></table></div></div>';
+                html += '</div>';
+
+                $('#reporteContainer').html(html);
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'danger');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function cargarErrores() {
+            showLoading();
+            try {
+                const response = await fetch('/api/errores');
+                const errores = await response.json();
+
+                let html = '<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Tipo</th><th>Descripción</th><th>Fecha</th><th>Usuario</th></tr></thead><tbody>';
+
+                if (errores.length === 0) {
+                    html += '<tr><td colspan="4" class="text-center text-muted">No hay errores registrados</td></tr>';
+                } else {
+                    errores.forEach(error => {
+                        html += `<tr>
+                            <td><span class="status-badge status-critico">${error.tipo_error}</span></td>
+                            <td>${error.descripcion}</td>
+                            <td>${new Date(error.fecha_hora).toLocaleString()}</td>
+                            <td>${error.usuario}</td>
+                        </tr>`;
+                    });
+                }
+
+                html += '</tbody></table></div>';
+                $('#reporteContainer').html(html);
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'danger');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        async function cargarNotificaciones() {
+            try {
+                const response = await fetch('/api/notificaciones');
+                const notificaciones = await response.json();
+
+                let html = '';
+
+                if (notificaciones.length === 0) {
+                    html = '<div class="text-center py-5"><i class="fas fa-check-circle fa-3x text-success mb-3"></i><h5 class="text-success">No hay notificaciones pendientes</h5></div>';
+                } else {
+                    notificaciones.forEach(notif => {
+                        const tipoClass = notif.tipo_notificacion === 'Evento Crítico' ? 'danger' :
+                                         notif.tipo_notificacion === 'Reabastecimiento' ? 'warning' : 'info';
+                        const leidaClass = notif.leida ? 'opacity-50' : '';
+
+                        html += `<div class="alert alert-${tipoClass} ${leidaClass}">
+                            <div class="d-flex">
+                                <div class="flex-grow-1">
+                                    <h6 class="alert-heading">
+                                        <i class="fas fa-${notif.tipo_notificacion === 'Evento Crítico' ? 'exclamation-triangle' : 'bell'}"></i>
+                                        ${notif.tipo_notificacion} - ${notif.dirigido_a}
+                                    </h6>
+                                    <p class="mb-1">${notif.mensaje}</p>
+                                    <small class="text-muted">${new Date(notif.fecha_hora).toLocaleString()}</small>
+                                </div>
+                                ${notif.leida ? '<div class="align-self-start"><i class="fas fa-check-circle text-success"></i></div>' : ''}
+                            </div>
+                        </div>`;
+                    });
+                }
+
+                $('#notificacionesContainer').html(html);
+            } catch (error) {
+                showAlert('Error al cargar notificaciones: ' + error.message, 'danger');
+            }
+        }
+
+        async function marcarNotificacionesLeidas() {
+            showLoading();
+            try {
+                const response = await fetch('/api/marcar-notificaciones-leidas', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'}
+                });
+
+                const result = await response.json();
+                if (result.success) {
+                    showAlert(result.message, 'success');
+                    await cargarNotificaciones();
+                    // Actualizar contador en el dashboard
+                    location.reload();
+                } else {
+                    showAlert(result.message, 'danger');
+                }
+            } catch (error) {
+                showAlert('Error: ' + error.message, 'danger');
+            } finally {
+                hideLoading();
+            }
+        }
+
+        // Funciones de utilidad
+        function showLoading() {
+            loadingModal.show();
+        }
+
+        function hideLoading() {
+            loadingModal.hide();
+        }
+
+        function showAlert(message, type) {
+            const alertHtml = `
+                <div class="alert alert-${type} alert-dismissible fade show position-fixed"
+                     style="top: 20px; right: 20px; z-index: 9999; min-width: 300px;" role="alert">
+                    ${message}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            `;
+            $('body').append(alertHtml);
+
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                $('.alert').fadeOut();
+            }, 5000);
+        }
+
+        // Set today's date as default for reports
+        document.getElementById('fechaReporte').valueAsDate = new Date();
+    </script>
+</body>
+</html>
